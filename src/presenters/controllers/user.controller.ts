@@ -1,54 +1,51 @@
-import { Body, Controller, Delete, Get, Post, Put, Res, UseGuards } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
-import { UserDto } from "src/application/dtos/InBound/user.dto";
-import { RespostaDto } from "src/application/dtos/OutBound/resposta.dto";
-import { IUserRepository } from "src/domain/IRepository/IUser.interface";
+import { Body, Controller, Delete, Get, Post, Put, UseGuards, Req, Param } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { UserDto } from 'src/application/dtos/InBound/user.dto';
+import { RespostaDto } from 'src/application/dtos/OutBound/resposta.dto';
 
-@Controller('UserController')
+import { Request } from 'express';
+import { UserService } from 'src/application/services/user.service';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { LoginDto } from 'src/application/dtos/InBound/login.dto';
+import { UserUpdateDto } from 'src/application/dtos/InBound/userUpdate.dto';
+import { UserDeleteDto } from 'src/application/dtos/InBound/delete.dto';
+import { JwtAuthGuard } from 'src/infra/auth/jwt.guard';
+
+@Controller('user')
 export class UserController {
-  constructor(private readonly _user: IUserRepository) {}
+  constructor(private readonly userService: UserService) {}
 
-  @Post('CadastrarUser')
-  async CadastrarUser(@Body() userDto: UserDto) : Promise<RespostaDto> {
-    var resposta = new RespostaDto();
-    resposta = await this._user.CadastrarUser(userDto);
-    return resposta;
+  @Post('cadastrar')
+  async CadastrarUser(@Body() userDto: UserDto): Promise<RespostaDto> {
+    return this.userService.cadastrarUser(userDto);
   }
 
-  @Put('AtualizarUser')
-  async AtualizarUser(@Body() userId: Number, userDto: UserDto) : Promise<RespostaDto> {
-    var resposta = new RespostaDto();
-    resposta = await this._user.AtualizarUser(userId, userDto);
-    return resposta;
+  @Put('atualizar')
+  async AtualizarUser(@Body() userUpdateDto:UserUpdateDto) : Promise<RespostaDto> {
+    return this.userService.atualizarUser(userUpdateDto.userId, userUpdateDto.userDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get('me')
-  async MeusDados(authToken: string) : Promise<RespostaDto> {
-    var resposta = new RespostaDto();
-    resposta = await this._user.MeusDados(authToken);
-    return resposta;
+  async MeusDados(@Req() req: Request): Promise<RespostaDto> {
+    const authToken = req.headers.authorization.split(' ')[1]; 
+    return this.userService.meusDados(authToken);
   }
 
-  @Get('TodosUsers')
+  @Get('todos')
   async TodosUsers(): Promise<RespostaDto> {
-    var resposta = new RespostaDto();
-    resposta = await this._user.TodosUsers();
-    return resposta;
-  }
-  
-  @Post('FazerLogin')
-  async FazerLogin(userNameOrEmail: string, password: string) : Promise<RespostaDto> {
-    var resposta = new RespostaDto();
-    resposta = await this._user.FazerLogin(userNameOrEmail, password);
-    return resposta;
+    return this.userService.todosUsers();
   }
 
-  @Delete('EliminarUser')
-  async EliminarUser(userId: Number) : Promise<RespostaDto> {
-    var resposta = new RespostaDto();
-    resposta = await this._user.EliminarUser(userId);
-    return resposta;
+
+  @Post('login')
+  async FazerLogin(@Body() loginDto: LoginDto): Promise<RespostaDto> {
+    return this.userService.fazerLogin(loginDto.userNameOrEmail, loginDto.password);
   }
 
+
+  @Delete('eliminar')
+  async EliminarUser(@Body() user: UserDeleteDto): Promise<RespostaDto> {
+    return this.userService.eliminarUser(user.userId);
+  }
 }
