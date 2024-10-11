@@ -102,7 +102,8 @@ export class UserService {
       const isPasswordValid = await bcrypt.compare(password, userExistente.Password);
       if (isPasswordValid) {
         resposta.mensagem = 'Sucesso: Usuário logado';
-        resposta.sucess = true; 
+        resposta.sucess = true;
+         
         resposta.resposta = await this.authService.generateToken(userExistente);
       } else {
         resposta.mensagem = 'Falha: Credenciais incorretas';

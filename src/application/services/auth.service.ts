@@ -1,16 +1,15 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { User } from "src/domain/entities/user";
+import * as jwt from 'jsonwebtoken';
 
-@Injectable()
 export class AuthService {
+  private readonly secret = 'Mr. English';
   constructor(private jwtService: JwtService) {}
 
-  async generateToken(usuario: User) : Promise<string> {
-    const payload = {'username': usuario.Email.toString(), 'sub': usuario.Id}
-    console.log(usuario.Email)
-    console.log(usuario.Id)
-    return await this.jwtService.signAsync(payload);
+  
+  generateToken(user: User): string {
+    return jwt.sign({ sub: user.Id, email: user.Email }, this.secret, { expiresIn: '1h' });
   }
 
   async verifyToken(authToken: string) : Promise<string> {
