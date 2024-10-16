@@ -9,6 +9,7 @@ import { JwtStrategy } from "src/infra/auth/jwt.strategy";
 @Module({
   imports: [
     JwtModule.register({
+      
       secret: 'Mr. English', 
       signOptions: { expiresIn: '60m' },
     }),
@@ -16,4 +17,4 @@ import { JwtStrategy } from "src/infra/auth/jwt.strategy";
   providers: [AuthService, JwtStrategy],
   exports: [JwtModule, AuthService]
 })
-export class AuthModule {}
+export class AuthModule {}  

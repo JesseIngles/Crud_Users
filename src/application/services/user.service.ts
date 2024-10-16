@@ -60,13 +60,22 @@ export class UserService {
     const resposta = new RespostaDto();
     try {
       const decodedToken = this.authService.verifyToken(authToken);
+      
       resposta.resposta = await this.prismaService.user.findFirstOrThrow({
-        where: { Id: decodedToken['sub'] },
+        where: { Id: Number.parseInt(decodedToken['id']) },
+        select: {
+          Id: true,
+          UserName: true,
+          Email: true,
+          Ocupacao: true,
+          Ativo: true
+        }
       });
+
       resposta.mensagem = 'Sucesso';
       resposta.sucess = true;
     } catch (error) {
-      resposta.mensagem = 'Falha: Token inválido ou expirado';
+      resposta.mensagem = 'Falha: Token inválido ou expirado. ' + error;
       resposta.sucess = false;
     }
 
@@ -98,7 +107,13 @@ export class UserService {
           OR: [{ UserName: userNameOrEmail }, { Email: userNameOrEmail }],
         },
       });
-
+      userExistente.Ativo = true;
+      await this.prismaService.user.update({
+        where: {
+          Id: userExistente.Id
+        },
+        data: userExistente
+      });
       const isPasswordValid = await bcrypt.compare(password, userExistente.Password);
       if (isPasswordValid) {
         resposta.mensagem = 'Sucesso: Usuário logado';

@@ -5,7 +5,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-
   var config = new DocumentBuilder()
     .setTitle('Crud-Users')
     .setDescription('É um desafio de api Rest Nodejs')

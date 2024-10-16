@@ -1,23 +1,26 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { User } from "src/domain/entities/user";
-import * as jwt from 'jsonwebtoken';
+// import * as jwt from 'jsonwebtoken';
 
+@Injectable()
 export class AuthService {
-  private readonly secret = 'Mr. English';
-  constructor(private jwtService: JwtService) {}
+  constructor(private readonly jwtService: JwtService) {
+  }
 
   
   generateToken(user: User): string {
-    return jwt.sign({ sub: user.Id, email: user.Email }, this.secret, { expiresIn: '1h' });
+    return this.jwtService.sign({ id: user.Id, email: user.Email }, {secret: 'Mr. English'});
+
   }
 
-  async verifyToken(authToken: string) : Promise<string> {
+  verifyToken(authToken: string) : any {
     try{
-      const decoded = await this.jwtService.verifyAsync(authToken);
+      const decoded = this.jwtService.verify(authToken);
       return decoded;
-    }catch{
-      throw new UnauthorizedException('Invalid token');
+
+    }catch(erro){
+      throw new UnauthorizedException(erro);
     }
 
   }

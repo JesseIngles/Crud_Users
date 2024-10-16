@@ -1,8 +1,6 @@
-import { Body, Controller, Delete, Get, Post, Put, UseGuards, Req, Param } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Body, Controller, Delete, Get, Post, Put, UseGuards, Req, Param, HttpCode, HttpStatus } from '@nestjs/common';
 import { UserDto } from 'src/application/dtos/InBound/user.dto';
 import { RespostaDto } from 'src/application/dtos/OutBound/resposta.dto';
-
 import { Request } from 'express';
 import { UserService } from 'src/application/services/user.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -11,7 +9,7 @@ import { UserUpdateDto } from 'src/application/dtos/InBound/userUpdate.dto';
 import { UserDeleteDto } from 'src/application/dtos/InBound/delete.dto';
 import { JwtAuthGuard } from 'src/infra/auth/jwt.guard';
 
-@Controller('user')
+@Controller('UserController')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -25,12 +23,13 @@ export class UserController {
     return this.userService.atualizarUser(userUpdateDto.userId, userUpdateDto.userDto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Get('me')
   async MeusDados(@Req() req: Request): Promise<RespostaDto> {
-    const authToken = req.headers.authorization.split(' ')[1]; 
+    const authToken = req.headers.authorization.split(" ")[1]; 
     return this.userService.meusDados(authToken);
   }
+ 
 
   @Get('todos')
   async TodosUsers(): Promise<RespostaDto> {

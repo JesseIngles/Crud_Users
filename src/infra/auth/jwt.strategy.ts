@@ -10,9 +10,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: 'Mr. English', 
+      ignoreExpiration: false,  
+      secretOrKey: 'Mr. English'
     });
+
   }
 
+  async validate(payload: any) {
+    return this.authService.verifyToken(payload); 
+  } 
   
 }
